@@ -1,4 +1,4 @@
-package de.androidcrypto.consolewithrobotofont;
+package de.androidcrypto.ziptutorial;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -11,11 +11,20 @@ import android.widget.TextView;
 
 /* ##### place your imports here ##### */
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /* ##### place your imports here ##### */
 
@@ -78,25 +87,36 @@ public class MainActivity extends AppCompatActivity {
     // place your main method here
     private void runMain() {
         printlnX("Android version: " + getAndroidVersion());
-        printlnX("Get actual timestamp");
-        for (int i = 0; i < 100; i++) {
-            printlnX("Actual timestamp nr: " + i + " is " + getTimestampFormatted());
-        }
 
+        // upload 2 files test1.txt and test2.txt to internal storage/files directory manually
+        final List<String> srcFiles = Arrays.asList("test1.txt", "test2.txt");
+        String zippedFilePath = "zippedfile.zip";
+        try {
+            File zippedFile = new File(getFilesDir(), zippedFilePath);
+            printlnX("zippedFile: " + zippedFile.toString());
+            FileOutputStream fos = new FileOutputStream(zippedFile);
+            ZipOutputStream zipOut = new ZipOutputStream(fos);
+            for (String srcFile : srcFiles) {
+                File srcDir = new File(getFilesDir(), "");
+                File fileToZip = new File(srcDir, srcFile);
+                FileInputStream fis = new FileInputStream(fileToZip);
+                ZipEntry zipEntry = new ZipEntry(fileToZip.getName());
+                zipOut.putNextEntry(zipEntry);
+                byte[] bytes = new byte[1024];
+                int length;
+                while ((length = fis.read(bytes)) >= 0) {
+                    zipOut.write(bytes, 0, length);
+                }
+                //zipOut.closeEntry();
+                fis.close();
+            }
+            zipOut.close();
+            fos.close();
+            printlnX("files successfully zipped");
+        } catch (IOException e) {
+            e.printStackTrace();
+            printlnX("Exception: " + e);
+        }
         printlnX("");
-    }
-
-    private static String getTimestampFormatted() {
-        // java.time is available from SDK 26+
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            DateTimeFormatter dtf = null;
-            dtf = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss");
-            LocalDateTime now = LocalDateTime.now();
-            return dtf.format(now);
-        } else {
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            Calendar cal = Calendar.getInstance();
-            return dateFormat.format(cal.getTime());
-        }
     }
 }

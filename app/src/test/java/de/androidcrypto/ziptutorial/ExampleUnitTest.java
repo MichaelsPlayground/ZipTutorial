@@ -1,4 +1,4 @@
-package de.androidcrypto.consolewithrobotofont;
+package de.androidcrypto.ziptutorial;
 
 import org.junit.Test;
 
